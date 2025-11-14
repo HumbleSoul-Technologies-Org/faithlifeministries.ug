@@ -17,7 +17,7 @@ export default function Navigation() {
   useEffect(() => {
     setTimeout(() => {
       refetch();
-    }, 5000); // Refresh every 60 seconds
+    }, 5000);
   }, []);
   const navItems = [
     { href: "/", label: "Home" },
@@ -57,7 +57,9 @@ export default function Navigation() {
             className=" mt-2 inline-block absolute z-40  text-accent text-xs font-bold p-2 py-0.5 rounded-full"
             data-testid="event-notification-badge"
           >
-            {events.filter((e: any) => new Date(e.date) >= new Date()).length}
+            {events.filter((e: any) => new Date(e.date) >= new Date()).length >
+              0 &&
+              events.filter((e: any) => new Date(e.date) >= new Date()).length}
           </span>
         )}
         {/* Bottom border for desktop hover */}
