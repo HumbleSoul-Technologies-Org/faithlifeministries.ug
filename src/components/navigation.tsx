@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "../components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
@@ -12,8 +12,13 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const { data: events = [], isLoading: hookLoading, refetch } = useEvents();
-  const { data: allSermons = [], isLoading: sermonsLoading } = useSermons();
+  // const { data: allSermons = [], isLoading: sermonsLoading } = useSermons();
 
+  useEffect(() => {
+    setTimeout(() => {
+      refetch();
+    }, 5000); // Refresh every 60 seconds
+  }, []);
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
