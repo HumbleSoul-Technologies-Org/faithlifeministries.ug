@@ -35,16 +35,19 @@ export default function Home() {
   const [currentSermon, setCurrentSermon] = useState<any>(sermons?.[0] || null);
   const [leadPastor, setLeadPastor] = useState<any>(null);
 
+  // Scroll to top only on initial mount
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
 
-    // Simulate fetching data
+  // Initialize data when sermons, events, or pastors change
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (sermons && sermons.length > 0) {
         const liveSermons = sermons.filter((sermon: any) => sermon.isLive);
         if (!currentSermon && liveSermons.length > 0) {
           setCurrentSermon(liveSermons?.[0] || null);
-        } else {
+        } else if (!currentSermon) {
           setCurrentSermon(sermons?.[0] || null);
         }
       }
@@ -59,7 +62,7 @@ export default function Home() {
     }, 500); // Reduced delay since data is already cached
 
     return () => clearTimeout(timer);
-  }, [sermons, events, pastors, currentSermon]);
+  }, [sermons, events, pastors]);
 
   return (
     <div>
