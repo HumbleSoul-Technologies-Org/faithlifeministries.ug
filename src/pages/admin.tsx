@@ -1469,7 +1469,6 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    getNotifications();
     getEvents();
     getSermons();
     getPastors();
@@ -1477,6 +1476,7 @@ function AdminDashboard() {
 
     const interval = setInterval(() => {
       getSubscribers();
+      getNotifications();
     }, 5000);
 
     return () => clearInterval(interval);
