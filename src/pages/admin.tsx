@@ -270,7 +270,7 @@ function AdminDashboard() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [deleteLoading, setdeleteLoading] = useState<string>("");
 
   useEffect(() => {
