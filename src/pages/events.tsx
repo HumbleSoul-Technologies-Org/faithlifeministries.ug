@@ -38,6 +38,11 @@ export default function Events() {
   );
   const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState<boolean>(true);
+  // true once the initial full load has completed
+  const [initialLoadCompleted, setInitialLoadCompleted] =
+    useState<boolean>(false);
+  // true when subsequent loads are happening in the background (do not show skeletons)
+  const [backgroundLoading, setBackgroundLoading] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(0);
   const eventsPerPage = 6;
@@ -49,12 +54,28 @@ export default function Events() {
 
   // when hook data or hook loading changes, update local state
   useEffect(() => {
-    // Use the hook's loading state directly; you can keep an extra UI delay here if desired.
-    setEventsLoading(hookLoading);
+    // Initial load: show skeletons. After first successful load, subsequent loads
+    // happen in background (no skeletons) and simply update the allEvents array.
+    if (hookLoading) {
+      if (!initialLoadCompleted) {
+        // first-time loading -> show full loading UI
+        setEventsLoading(true);
+        setBackgroundLoading(false);
+      } else {
+        // subsequent loading -> keep UI visible, mark background updating
+        setEventsLoading(false);
+        setBackgroundLoading(true);
+      }
+    } else {
+      // loading finished: hide loading UI and mark initial load completed
+      setEventsLoading(false);
+      setBackgroundLoading(false);
+      setInitialLoadCompleted(true);
+    }
 
     // safely set events array (default to empty array)
     setAllEvents(Array.isArray(events) ? events : []);
-  }, [events, hookLoading]);
+  }, [events, hookLoading, initialLoadCompleted]);
 
   // Update current time every minute
   useEffect(() => {
@@ -346,12 +367,19 @@ export default function Events() {
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
           <div className="text-center mb-12">
-            <h2
-              className="text-3xl sm:text-4xl font-bold text-foreground mb-4"
-              data-testid="all-events-title"
-            >
-              All Events
-            </h2>
+            <div className="flex items-center justify-center gap-3">
+              <h2
+                className="text-3xl sm:text-4xl font-bold text-foreground mb-4"
+                data-testid="all-events-title"
+              >
+                All Events
+              </h2>
+              {backgroundLoading && (
+                <span className="text-sm text-muted-foreground mb-4">
+                  Updating...
+                </span>
+              )}
+            </div>
             <p
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto"
               data-testid="all-events-description"

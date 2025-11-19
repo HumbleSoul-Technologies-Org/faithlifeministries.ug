@@ -310,10 +310,7 @@ function AdminDashboard() {
             .string()
             .min(1, "Date is required")
             .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-          time: z
-            .string()
-            .min(1, "Time is required")
-            .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+          time: z.string().min(1, "Time is required"),
           location: z.string().min(1, "Location is required"),
           speaker: z.string().optional().or(z.literal("")),
           thumbnailUrl: z.string().optional().or(z.literal("")),
@@ -1671,7 +1668,7 @@ function AdminDashboard() {
                               <Label htmlFor="time">Time</Label>
                               <Input
                                 {...eventForm.register("time")}
-                                placeholder="7:00 PM"
+                                placeholder="7:00 AM-9:00 PM"
                                 data-testid="input-event-time"
                               />
                             </div>
