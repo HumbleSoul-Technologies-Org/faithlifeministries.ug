@@ -522,31 +522,31 @@ export default function Sermons() {
                         </span>
 
                         {/* Sharing Btn */}
-                        <span
-                          className="flex-row cursor-pointer flex-1 flex items-center gap-2 hover:text-primary transition-colors"
-                          onClick={() => {
-                            try {
-                              const url = `${window.location.origin}/sermons/${displayedSermon?._id}`;
-                              navigator.clipboard?.writeText(url);
-                              toast({ title: "Sermon link copied" });
-                            } catch (e) {
-                              toast({
-                                title: "Could not copy sermon link",
-                                variant: "destructive",
-                              });
-                            }
-                          }}
-                        >
+                        <span className="flex-row cursor-pointer flex-1 flex items-center gap-2 hover:text-primary transition-colors">
                           <span>Share</span>
-                          <Share2 size={16} />
+                          <Share2
+                            onClick={() => {
+                              try {
+                                const url = `${window.location.origin}/sermons/${displayedSermon?._id}`;
+                                navigator.clipboard?.writeText(url);
+                                toast({ title: "Sermon link copied" });
+                              } catch (e) {
+                                toast({
+                                  title: "Could not copy sermon link",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            size={16}
+                          />
                         </span>
-                        <span className="text-xs text-muted">
+                        {/* <span className="text-xs text-muted">
                           {displayedSermon?.createdAt &&
                             format(
                               new Date(displayedSermon.createdAt),
                               "MMMM d, yyyy"
                             )}
-                        </span>
+                        </span> */}
                         <span className="text-xs text-muted">
                           {displayedSermon?.date &&
                             format(
