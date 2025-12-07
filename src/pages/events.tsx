@@ -10,7 +10,15 @@ import {
 } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Calendar, MapPin, Clock, User, Users } from "lucide-react";
-import { format, isPast, isToday, parseISO, isFuture, set } from "date-fns";
+import {
+  format,
+  isPast,
+  isToday,
+  parseISO,
+  isFuture,
+  set,
+  compareAsc,
+} from "date-fns";
 import { Skeleton } from "../components/ui/skeleton";
 import EventCard from "../components/event-card";
 import { useAppData } from "../hooks/use-AppData"; // <- ensure this path/name matches your hook file
@@ -118,9 +126,18 @@ export default function Events() {
     return "upcoming";
   };
 
+  const sortEventsByDate = (eventsToSort: EventItem[]) => {
+    return [...eventsToSort].sort((a, b) => {
+      const dateA = getEventDateTime(a);
+      const dateB = getEventDateTime(b);
+      if (!dateA || !dateB) return 0;
+      return compareAsc(dateA, dateB);
+    });
+  };
+
   // derive upcoming/ongoing/past with useMemo for performance
   const { upcomingEvents, ongoingEvents, pastEvents } = useMemo(() => {
-    return allEvents.reduce(
+    const categorized = allEvents.reduce(
       (acc, event) => {
         const status = getEventStatus(event);
         if (status === "upcoming") acc.upcomingEvents.push(event);
@@ -134,6 +151,12 @@ export default function Events() {
         pastEvents: [] as EventItem[],
       }
     );
+
+    return {
+      upcomingEvents: sortEventsByDate(categorized.upcomingEvents),
+      ongoingEvents: sortEventsByDate(categorized.ongoingEvents),
+      pastEvents: sortEventsByDate(categorized.pastEvents).reverse(),
+    };
   }, [allEvents, currentTime]);
 
   const getCategoryColor = (category: string) => {
@@ -237,6 +260,10 @@ export default function Events() {
     );
   };
 
+  // Get featured event: ongoing first, then nearest upcoming
+  const featuredEvent =
+    ongoingEvents.length > 0 ? ongoingEvents[0] : upcomingEvents[0];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -264,7 +291,7 @@ export default function Events() {
             <Skeleton className="h-96 w-full" />
           </div>
         </section>
-      ) : ongoingEvents.length > 0 || upcomingEvents.length > 0 ? (
+      ) : featuredEvent ? (
         <section className="py-16 bg-card">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <div className="text-center mb-12">
@@ -289,11 +316,11 @@ export default function Events() {
                 <div>
                   <img
                     src={
-                      (ongoingEvents[0] || upcomingEvents[0])?.thumbnail?.url ||
-                      (ongoingEvents[0] || upcomingEvents[0])?.thumbnailUrl ||
+                      featuredEvent?.thumbnail?.url ||
+                      featuredEvent?.thumbnailUrl ||
                       "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png"
                     }
-                    alt={(ongoingEvents[0] || upcomingEvents[0]).title}
+                    alt={featuredEvent?.title}
                     className="w-full h-64 md:h-full object-cover"
                     data-testid="featured-event-image"
                   />
@@ -301,14 +328,10 @@ export default function Events() {
                 <CardContent className="p-8">
                   <div className="flex items-center gap-3 mb-4">
                     <Badge
-                      className={getCategoryColor(
-                        (ongoingEvents[0] || upcomingEvents[0]).category
-                      )}
+                      className={getCategoryColor(featuredEvent?.category)}
                       data-testid="featured-event-category"
                     >
-                      {(
-                        ongoingEvents[0] || upcomingEvents[0]
-                      ).category?.toUpperCase()}
+                      {featuredEvent?.category?.toUpperCase()}
                     </Badge>
                     {ongoingEvents.length > 0 && <Badge>On Going</Badge>}
                   </div>
@@ -317,23 +340,23 @@ export default function Events() {
                     className="text-3xl font-bold text-card-foreground mb-4"
                     data-testid="featured-event-name"
                   >
-                    {(ongoingEvents[0] || upcomingEvents[0]).title}
+                    {featuredEvent?.title}
                   </h3>
 
                   <p
                     className="text-muted-foreground mb-6 text-lg"
                     data-testid="featured-event-desc"
                   >
-                    {(ongoingEvents[0] || upcomingEvents[0]).description}
+                    {featuredEvent?.description}
                   </p>
 
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center text-muted-foreground">
                       <Calendar className="mr-3 h-5 w-5 text-primary" />
                       <span data-testid="featured-event-date">
-                        {upcomingEvents[0].date
+                        {featuredEvent?.date
                           ? format(
-                              new Date(upcomingEvents[0].date),
+                              new Date(featuredEvent.date),
                               "EEEE, MMMM d, yyyy"
                             )
                           : "Date TBA"}
@@ -342,20 +365,20 @@ export default function Events() {
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="mr-3 h-5 w-5 text-primary" />
                       <span data-testid="featured-event-time">
-                        {upcomingEvents[0].time || "Time TBA"}
+                        {featuredEvent?.time || "Time TBA"}
                       </span>
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <MapPin className="mr-3 h-5 w-5 text-primary" />
                       <span data-testid="featured-event-location">
-                        {upcomingEvents[0].location || "Location TBA"}
+                        {featuredEvent?.location || "Location TBA"}
                       </span>
                     </div>
-                    {upcomingEvents[0].speaker && (
+                    {featuredEvent?.speaker && (
                       <div className="flex items-center text-muted-foreground">
                         <User className="mr-3 h-5 w-5 text-primary" />
                         <span data-testid="featured-event-speaker">
-                          {upcomingEvents[0].speaker}
+                          {featuredEvent.speaker}
                         </span>
                       </div>
                     )}
@@ -378,11 +401,6 @@ export default function Events() {
               >
                 All Events
               </h2>
-              {/* {backgroundLoading && (
-                <span className="text-sm text-muted-foreground mb-4">
-                  Updating...
-                </span>
-              )} */}
             </div>
             <p
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto"
