@@ -18,6 +18,7 @@ import {
   isFuture,
   set,
   compareAsc,
+  startOfDay,
 } from "date-fns";
 import { Skeleton } from "../components/ui/skeleton";
 import EventCard from "../components/event-card";
@@ -103,24 +104,20 @@ export default function Events() {
     const eventDateTime = getEventDateTime(event);
     if (!eventDateTime) return "upcoming";
 
-    // Get just the date part (ignore time) for past/future comparison
-    const eventDate = new Date(
-      eventDateTime.getFullYear(),
-      eventDateTime.getMonth(),
-      eventDateTime.getDate()
-    );
-    const today = new Date(
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate()
-    );
+    const eventDateOnly = startOfDay(eventDateTime);
+    const todayOnly = startOfDay(currentTime);
 
-    if (eventDate < today) {
+    // Use date-fns functions for reliable date comparison
+    if (isPast(eventDateOnly) && !isToday(eventDateOnly)) {
       return "past";
     }
 
-    if (eventDate.getTime() === today.getTime()) {
+    if (isToday(eventDateOnly)) {
       return "ongoing";
+    }
+
+    if (isFuture(eventDateOnly)) {
+      return "upcoming";
     }
 
     return "upcoming";
