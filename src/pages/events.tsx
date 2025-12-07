@@ -95,20 +95,24 @@ export default function Events() {
     const eventDateTime = getEventDateTime(event);
     if (!eventDateTime) return "upcoming";
 
-    if (isPast(set(eventDateTime, { hours: 23, minutes: 59, seconds: 59 }))) {
+    // Get just the date part (ignore time) for past/future comparison
+    const eventDate = new Date(
+      eventDateTime.getFullYear(),
+      eventDateTime.getMonth(),
+      eventDateTime.getDate()
+    );
+    const today = new Date(
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate()
+    );
+
+    if (eventDate < today) {
       return "past";
     }
 
-    if (isToday(eventDateTime)) {
-      const now = currentTime;
-      const eventTime = set(now, {
-        hours: eventDateTime.getHours(),
-        minutes: eventDateTime.getMinutes(),
-      });
-
-      if (eventTime.getTime() <= now.getTime()) {
-        return "ongoing";
-      }
+    if (eventDate.getTime() === today.getTime()) {
+      return "ongoing";
     }
 
     return "upcoming";
