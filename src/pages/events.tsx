@@ -19,6 +19,8 @@ import {
   set,
   compareAsc,
   startOfDay,
+  isBefore,
+  isEqual,
 } from "date-fns";
 import { Skeleton } from "../components/ui/skeleton";
 import EventCard from "../components/event-card";
@@ -92,14 +94,31 @@ export default function Events() {
     return () => clearInterval(timer);
   }, []);
 
+  // Replace getEventDateTime with a more robust parser that handles date-only values and invalid times
   const getEventDateTime = (event: EventItem) => {
-    if (!event?.date || !event?.time) return null;
-    const [hours, minutes] = event.time.split(":").map(Number);
-    const date = parseISO(event.date);
-    if (isNaN(date.getTime()) || isNaN(hours) || isNaN(minutes)) return null;
-    return set(date, { hours, minutes });
+    if (!event?.date) return null;
+
+    // Try parseISO, fallback to Date constructor
+    let dateOnly: Date | null = null;
+    const parsed = parseISO(event.date);
+    if (!isNaN(parsed.getTime())) dateOnly = parsed;
+    else {
+      const fallback = new Date(event.date);
+      if (!isNaN(fallback.getTime())) dateOnly = fallback;
+    }
+    if (!dateOnly) return null;
+
+    // If no time provided or invalid time, return start of day for that date
+    if (!event.time) return startOfDay(dateOnly);
+    const parts = event.time.split(":").map(Number);
+    const hours = parts[0];
+    const minutes = parts[1] ?? 0;
+    if (isNaN(hours) || isNaN(minutes)) return startOfDay(dateOnly);
+
+    return set(dateOnly, { hours, minutes });
   };
 
+  // Replace getEventStatus to compare day-only dates reliably using date-fns
   const getEventStatus = (event: EventItem) => {
     const eventDateTime = getEventDateTime(event);
     if (!eventDateTime) return "upcoming";
@@ -107,19 +126,8 @@ export default function Events() {
     const eventDateOnly = startOfDay(eventDateTime);
     const todayOnly = startOfDay(currentTime);
 
-    // Use date-fns functions for reliable date comparison
-    if (isPast(eventDateOnly) && !isToday(eventDateOnly)) {
-      return "past";
-    }
-
-    if (isToday(eventDateOnly)) {
-      return "ongoing";
-    }
-
-    if (isFuture(eventDateOnly)) {
-      return "upcoming";
-    }
-
+    if (isBefore(eventDateOnly, todayOnly)) return "past";
+    if (isEqual(eventDateOnly, todayOnly)) return "ongoing";
     return "upcoming";
   };
 
