@@ -24,7 +24,7 @@ export default function Home() {
   const { data: sermons = [], isLoading: sermonsLoading } = useSermons();
   const { data: events = [], isLoading: eventsLoading } = useEvents();
   const { data: pastors = [], isLoading: pastorLoading } = useQuery({
-    queryKey: ["pastors"],
+    queryKey: ["pastors","all"],
     queryFn: async () => {
       const response = await axios.get(`${Configs.url}/api/pastors/all`);
       return response.data.pastors || [];
@@ -40,8 +40,8 @@ export default function Home() {
 
   // Scroll to top only on initial mount
   useEffect(() => {
-    if(Pastors && Pastors > 0){
-      setLeadPastor(Pastors[0] || null)
+    if(pastors && pastors > 0){
+      setLeadPastor(pastors[0] || null)
     }
     window.scrollTo(0, 0);
   }, []);
@@ -237,7 +237,7 @@ export default function Home() {
                 <Skeleton className="rounded-xl w-full h-[400px]" />
               ) : (
                 <img
-                  src={leadPastor.profileImg.url}
+                  src={leadPastor?.profileImg?.url}
                   alt="Pastor delivering sermon from church pulpit"
                   className="rounded-xl shadow-lg w-full h-auto"
                   data-testid="pastor-image"
