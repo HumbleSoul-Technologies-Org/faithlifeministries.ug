@@ -294,6 +294,41 @@ export default function About() {
         </div>
       </section>
 
+      {/* Vision & Mission */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <div className="text-center mb-12">
+            <h2
+              className="text-4xl font-bold text-foreground mb-4"
+              style={{ fontFamily: "Dancing Script" }}
+            >
+              Vision & Mission
+            </h2>
+            <p className="text-xl text-muted-foreground">Our direction and purpose as a church</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="p-6">
+              <CardContent>
+                <h3 className="text-2xl font-semibold text-card-foreground mb-4">Vision</h3>
+                <p className="text-muted-foreground">
+                  At FaithLife Ministries, our vision is to be a spiritual home where everyone belongs. We are dedicated to creating a connected community for all ages, marked by joyful worship and practical faith, where every person can grow and discover their place in God's family.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6">
+              <CardContent>
+                <h3 className="text-2xl font-semibold text-card-foreground mb-4">Mission</h3>
+                <p className="text-muted-foreground">
+                  To ignite spiritual growth and foster deep connection through welcoming worship and practical teaching. With the support of our partners, we are expanding our reach to nurture the next generation and serve as a beacon of hope and practical help in our region.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Pastoral Team */}
       {pastors.length > 0 && (
         <section className="py-16 bg-card">
@@ -448,7 +483,7 @@ export default function About() {
                     <p className="text-muted-foreground">
                       Kitetika, mutuba 1, wakiso, Uganda
                     </p>
-                    <p className="text-muted-foreground">(+256) 7xx-xxx-xxx</p>
+                    <p className="text-muted-foreground">(+256) 701 878 025</p>
                   </div>
                 </CardContent>
               </Card>
