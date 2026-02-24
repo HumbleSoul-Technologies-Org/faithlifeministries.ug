@@ -15,8 +15,11 @@ import { useQuery } from "@tanstack/react-query";
 import { VideoPlayer } from "../components/video-player";
 import axios from "axios";
 import { Configs } from "../lib/utils";
+import { useAppData } from "../hooks/use-AppData";
 
 export default function Home() {
+
+  const {Pastors} = useAppData()
   // TanStack Query hooks
   const { data: sermons = [], isLoading: sermonsLoading } = useSermons();
   const { data: events = [], isLoading: eventsLoading } = useEvents();
@@ -37,6 +40,9 @@ export default function Home() {
 
   // Scroll to top only on initial mount
   useEffect(() => {
+    if(Pastors && Pastors > 0){
+      setLeadPastor(Pastors[0] || null)
+    }
     window.scrollTo(0, 0);
   }, []);
 
@@ -63,6 +69,8 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, [sermons, events, pastors]);
+
+  
 
   return (
     <div>
@@ -229,7 +237,7 @@ export default function Home() {
                 <Skeleton className="rounded-xl w-full h-[400px]" />
               ) : (
                 <img
-                  src={"https://byamukama2026.com/og-image.jpg"}
+                  src={leadPastor.profileImg.url}
                   alt="Pastor delivering sermon from church pulpit"
                   className="rounded-xl shadow-lg w-full h-auto"
                   data-testid="pastor-image"
